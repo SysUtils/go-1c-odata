@@ -19,7 +19,9 @@ func (c *Client) Get(entity IEntity, fields []string) error {
 		uri += fmt.Sprintf("&$select=%s", url.PathEscape(strings.Join(fields, ","))) // Fields
 	}
 	data, err := c.get(uri)
-
+	if err != nil {
+		return err
+	}
 	return json.Unmarshal(data, entity)
 }
 
@@ -33,8 +35,18 @@ func (c *Client) GetMany(entity interface{}, where Where) error {
 	uri += where.Serialize()
 
 	data, err := c.get(uri)
-
-	return json.Unmarshal(data, entity)
+	if err != nil {
+		return err
+	}
+	type ReturnObj struct {
+		Value json.RawMessage `json:"value"`
+	}
+	outer := ReturnObj{}
+	err = json.Unmarshal(data, &outer)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, &entity)
 }
 
 // Returns json representation of entity's NavigationProperty
