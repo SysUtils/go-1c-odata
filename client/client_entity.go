@@ -46,7 +46,7 @@ func (c *Client) GetMany(entity interface{}, where Where) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(data, &entity)
+	return json.Unmarshal(outer.Value, &entity)
 }
 
 // Returns json representation of entity's NavigationProperty
