@@ -43,7 +43,7 @@ func keyToQuery(key interface{}) string {
 
 func getEntityName(entity interface{}) (string, error) {
 	t := reflect.TypeOf(entity)
-	if t.Kind() == reflect.Slice {
+	for t.Kind() == reflect.Slice || t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
 	if t.Kind() != reflect.Struct {
