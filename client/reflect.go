@@ -13,7 +13,7 @@ func appendDelim(s, postfix, delim string) string {
 	return s
 }
 
-func KeyToQuery(key interface{}) string {
+func keyToQuery(key interface{}) string {
 	type serializable interface {
 		Query() string
 	}
@@ -39,4 +39,22 @@ func KeyToQuery(key interface{}) string {
 		}
 	}
 	return result
+}
+
+func getEntityName(entity interface{}) (string, error) {
+	t := reflect.TypeOf(entity)
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return "", ErrInvalidEntity
+	}
+	if t.NumField() < 1 {
+		return "", ErrInvalidEntity
+	}
+	f := t.Field(0)
+	if result, ok := f.Tag.Lookup("typename"); ok {
+		return result, nil
+	}
+	return "", ErrInvalidEntity
 }

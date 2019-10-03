@@ -7,23 +7,34 @@ import (
 	"strings"
 )
 
-func (c *Client) getEntity(keys IPrimaryKey, fields []string) ([]byte, error) {
-	uri := "/" + url.PathEscape(keys.APIEntityType())
-	uri += fmt.Sprintf("(%s)", keys.Serialize()) // Unique key
+func (c *Client) Get(entity IEntity, fields []string) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
+	uri := "/" + url.PathEscape(typename)
+	uri += fmt.Sprintf("(%s)", keyToQuery(entity._Key())) // Unique key
 	uri += "?$format=json"
 	if len(fields) > 0 {
 		uri += fmt.Sprintf("&$select=%s", url.PathEscape(strings.Join(fields, ","))) // Fields
 	}
+	data, err := c.get(uri)
 
-	return c.get(uri)
+	return json.Unmarshal(data, entity)
 }
 
-func (c *Client) getEntities(name string, where Where) ([]byte, error) {
-	uri := "/" + url.PathEscape(name)
+func (c *Client) GetMany(entity interface{}, where Where) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
+	uri := "/" + url.PathEscape(typename)
 	uri += "?$format=json&"
 	uri += where.Serialize()
 
-	return c.get(uri)
+	data, err := c.get(uri)
+
+	return json.Unmarshal(data, entity)
 }
 
 // Returns json representation of entity's NavigationProperty
@@ -60,12 +71,12 @@ func (c *Client) updateEntity(key IPrimaryKey, entity IEntity) ([]byte, error) {
 		return nil, err
 	}
 
-	uri := "/" + url.PathEscape(entity.APIEntityType())
+	//uri := "/" + url.PathEscape(entity.APIEntityType())
 
-	uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
-	uri += "?$format=json"
+	//uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
+	//uri += "?$format=json"
 
-	return c.patch(uri, data)
+	return c.patch("", data)
 }
 
 func (c *Client) removeEntity(key IPrimaryKey) error {
@@ -82,7 +93,7 @@ func (c *Client) createEntity(entity IEntity) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	uri := "/" + url.PathEscape(entity.APIEntityType()) + "?$format=json"
+	//	uri := "/" + url.PathEscape(entity.APIEntityType()) + "?$format=json"
 
-	return c.post(uri, data)
+	return c.post("", data)
 }
