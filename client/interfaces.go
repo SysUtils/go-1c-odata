@@ -2,8 +2,8 @@ package client
 
 // Interface for odata Entity type
 type IEntity interface {
-	_Key() interface{}
-	_Data() interface{}
+	Key__() interface{}
+	Data__() interface{}
 }
 
 // Interface for odata PrimaryKey type
