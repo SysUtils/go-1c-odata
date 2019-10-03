@@ -13,7 +13,7 @@ func (c *Client) Get(entity IEntity, fields []string) error {
 		return err
 	}
 	uri := "/" + url.PathEscape(typename)
-	uri += fmt.Sprintf("(%s)", keyToQuery(entity._Key())) // Unique key
+	uri += fmt.Sprintf("(%s)", keyToQuery(entity.Key__())) // Unique key
 	uri += "?$format=json"
 	if len(fields) > 0 {
 		uri += fmt.Sprintf("&$select=%s", url.PathEscape(strings.Join(fields, ","))) // Fields
