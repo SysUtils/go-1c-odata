@@ -77,24 +77,33 @@ func (c *Client) ExecuteEntityMethod(key IPrimaryKey, function IFunction) ([]byt
 	return c.post(uri, nil)
 }
 
-func (c *Client) updateEntity(key IPrimaryKey, entity IEntity) ([]byte, error) {
+func (c *Client) Update(entity IEntity) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
 	data, err := json.Marshal(entity)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	//uri := "/" + url.PathEscape(entity.APIEntityType())
+	uri := "/" + url.PathEscape(typename)
 
-	//uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
-	//uri += "?$format=json"
+	uri += fmt.Sprintf("(%s)", url.PathEscape(keyToQuery(entity.Key__()))) // Unique key
+	uri += "?$format=json"
+	data, err = c.patch(uri, data)
 
-	return c.patch("", data)
+	return json.Unmarshal(data, entity)
 }
 
-func (c *Client) removeEntity(key IPrimaryKey) error {
-	uri := "/" + url.PathEscape(key.APIEntityType())
+func (c *Client) Remove(entity IEntity) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
+	uri := "/" + url.PathEscape(typename)
 
-	uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
+	uri += fmt.Sprintf("(%s)", url.PathEscape(keyToQuery(entity.Key__()))) // Unique key
 	uri += "?$format=json"
 
 	return c.delete(uri)
