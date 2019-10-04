@@ -100,12 +100,20 @@ func (c *Client) removeEntity(key IPrimaryKey) error {
 	return c.delete(uri)
 }
 
-func (c *Client) createEntity(entity IEntity) ([]byte, error) {
+func (c *Client) Create(entity IEntity) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
 	data, err := json.Marshal(entity)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	//	uri := "/" + url.PathEscape(entity.APIEntityType()) + "?$format=json"
+	uri := "/" + url.PathEscape(typename) + "?$format=json"
 
-	return c.post("", data)
+	data, err = c.post(uri, data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, entity)
 }
