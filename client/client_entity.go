@@ -96,7 +96,7 @@ func (c *Client) Update(entity IEntity) error {
 	return json.Unmarshal(data, entity)
 }
 
-func (c *Client) Remove(entity IEntity) error {
+func (c *Client) Delete(entity IEntity) error {
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
