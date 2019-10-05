@@ -83,9 +83,11 @@ func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string
 		return err
 	}
 
-	err = json.Unmarshal(data, result)
-	if err != nil {
-		return err
+	if result != nil {
+		err = json.Unmarshal(data, result)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
