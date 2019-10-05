@@ -91,9 +91,8 @@ func setClientToSlice(slice interface{}, c *Client) {
 	t := reflect.TypeOf(slice)
 	s := reflect.ValueOf(slice)
 	for t.Kind() == reflect.Ptr {
-		slice = s.Elem().Interface()
-		t = reflect.TypeOf(slice)
-		s = reflect.ValueOf(slice)
+		t = t.Elem()
+		s = s.Elem()
 	}
 	if t.Kind() != reflect.Slice {
 		return
