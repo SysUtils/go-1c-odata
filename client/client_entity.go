@@ -8,6 +8,7 @@ import (
 )
 
 func (c *Client) Get(entity IEntity, fields []string) error {
+	entity.SetClient__(c)
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
