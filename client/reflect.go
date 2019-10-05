@@ -86,3 +86,20 @@ func getEntityName(entity interface{}) (string, error) {
 	}
 	return "", ErrInvalidEntity
 }
+
+func setClientToSlice(slice interface{}, c *Client) {
+	t := reflect.TypeOf(slice)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Slice {
+		return
+	}
+	s := reflect.ValueOf(t)
+
+	for i := 0; i < s.Len(); i++ {
+		if e, ok := s.Index(i).Interface().(IEntity); ok {
+			e.SetClient__(c)
+		}
+	}
+}

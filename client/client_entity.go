@@ -46,11 +46,17 @@ func (c *Client) GetMany(entity interface{}, where Where) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(outer.Value, &entity)
+	err = json.Unmarshal(outer.Value, &entity)
+	if err != nil {
+		return err
+	}
+
+	setClientToSlice(entity, c)
+	return nil
 }
 
 // Returns json representation of entity's NavigationProperty
-func (c *Client) GetEntityNavigaion(key IPrimaryKey, property string) ([]byte, error) {
+/*func (c *Client) GetEntityNavigaion(key IPrimaryKey, property string) ([]byte, error) {
 	uri := "/" + url.PathEscape(key.APIEntityType())
 	uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
 	uri += "/" + url.PathEscape(property)
@@ -64,7 +70,7 @@ func (c *Client) GetEntityNavigaion(key IPrimaryKey, property string) ([]byte, e
 	}
 
 	return body, err
-}
+}*/
 
 // Execute entity's method and return its output in json
 func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string, params interface{}) error {
@@ -89,11 +95,12 @@ func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string
 			return err
 		}
 	}
-
+	setClientToSlice(result, c)
 	return nil
 }
 
 func (c *Client) Update(entity IEntity) error {
+	entity.SetClient__(c)
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
@@ -113,6 +120,7 @@ func (c *Client) Update(entity IEntity) error {
 }
 
 func (c *Client) Delete(entity IEntity) error {
+	entity.SetClient__(c)
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
@@ -126,6 +134,7 @@ func (c *Client) Delete(entity IEntity) error {
 }
 
 func (c *Client) Create(entity IEntity) error {
+	entity.SetClient__(c)
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
