@@ -56,25 +56,27 @@ func (c *Client) GetMany(entity interface{}, where Where) error {
 	return nil
 }
 
-// Returns json representation of entity's NavigationProperty
-/*func (c *Client) GetEntityNavigaion(key IPrimaryKey, property string) ([]byte, error) {
-	uri := "/" + url.PathEscape(key.APIEntityType())
-	uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
-	uri += "/" + url.PathEscape(property)
+func (c *Client) GetNavigaion(entity IEntity, navigation string, result interface{}) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
+	uri := "/" + url.PathEscape(typename)
+	uri += fmt.Sprintf("(%s)", keyToQuery(entity.Key__())) // Unique key
+	uri += "/" + url.PathEscape(navigation)
 	uri += "?$format=json&"
 
 	body, err := c.get(uri)
 	if err != nil {
 		if err.Error() == "404 Not found\nBody:\n" {
-			return nil, nil
+			return nil
 		}
 	}
 
-	return body, err
-}*/
+	return json.Unmarshal(body, result)
+}
 
-// Execute entity's method and return its output in json
-func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string, params interface{}) error {
+func (c *Client) ExecuteMethod(entity IEntity, method string, params interface{}, result interface{}) error {
 	typename, err := getEntityName(entity)
 	if err != nil {
 		return err
@@ -115,6 +117,9 @@ func (c *Client) Update(entity IEntity) error {
 	uri += fmt.Sprintf("(%s)", url.PathEscape(keyToQuery(entity.Key__()))) // Unique key
 	uri += "?$format=json"
 	data, err = c.patch(uri, data)
+	if err != nil {
+		return err
+	}
 
 	return json.Unmarshal(data, entity)
 }
