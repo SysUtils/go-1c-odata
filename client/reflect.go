@@ -91,15 +91,16 @@ func setClientToSlice(slice interface{}, c *Client) {
 	t := reflect.TypeOf(slice)
 	s := reflect.ValueOf(slice)
 	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-		s = s.Elem()
+		slice = s.Elem().Interface()
+		t = reflect.TypeOf(slice)
+		s = reflect.ValueOf(slice)
 	}
 	if t.Kind() != reflect.Slice {
 		return
 	}
 
 	for i := 0; i < s.Len(); i++ {
-		if e, ok := s.Index(i).Interface().(IEntity); ok {
+		if e, ok := s.Index(i).Addr().Interface().(IEntity); ok {
 			e.SetClient__(c)
 		}
 	}
