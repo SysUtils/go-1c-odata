@@ -13,6 +13,34 @@ func appendDelim(s, postfix, delim string) string {
 	return s
 }
 
+func paramsToQuery(params interface{}) string {
+	type serializable interface {
+		Query() string
+	}
+
+	result := ""
+
+	t := reflect.TypeOf(params)
+	v := reflect.ValueOf(params)
+	if t.Kind() != reflect.Struct {
+		return result
+	}
+
+	nFields := t.NumField()
+	for i := 0; i < nFields; i++ {
+		f := t.Field(i)
+		json := f.Tag.Get("json")
+		if json != "" {
+			json = strings.Split(json, ",")[0]
+			val := v.Field(i)
+			if inter, ok := val.Interface().(serializable); ok {
+				result = appendDelim(result, json+"="+inter.Query(), "&")
+			}
+		}
+	}
+	return result
+}
+
 func keyToQuery(key interface{}) string {
 	type serializable interface {
 		Query() string
@@ -34,7 +62,7 @@ func keyToQuery(key interface{}) string {
 			json = strings.Split(json, ",")[0]
 			val := v.Field(i)
 			if inter, ok := val.Interface().(serializable); ok {
-				result = appendDelim(result, json+"="+inter.Query(), "&")
+				result = appendDelim(result, json+"="+inter.Query(), ",")
 			}
 		}
 	}

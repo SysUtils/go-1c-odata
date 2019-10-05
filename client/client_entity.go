@@ -67,14 +67,28 @@ func (c *Client) GetEntityNavigaion(key IPrimaryKey, property string) ([]byte, e
 }
 
 // Execute entity's method and return its output in json
-func (c *Client) ExecuteEntityMethod(key IPrimaryKey, function IFunction) ([]byte, error) {
-	uri := "/" + url.PathEscape(key.APIEntityType())
-	uri += fmt.Sprintf("(%s)", url.PathEscape(key.Serialize())) // Unique key
-	uri += "/" + function.Name()
-	uri += "?$format=json&"
-	uri += function.Parameters()
+func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string, params interface{}) error {
+	typename, err := getEntityName(entity)
+	if err != nil {
+		return err
+	}
 
-	return c.post(uri, nil)
+	uri := "/" + url.PathEscape(typename)
+	uri += fmt.Sprintf("(%s)", url.PathEscape(keyToQuery(entity.Key__()))) // Unique key
+	uri += "/" + method
+	uri += "?$format=json&"
+	uri += paramsToQuery(params)
+	data, err := c.post(uri, nil)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(data, result)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) Update(entity IEntity) error {
