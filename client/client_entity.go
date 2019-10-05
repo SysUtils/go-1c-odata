@@ -96,7 +96,6 @@ func (c *Client) ExecuteMethod(entity IEntity, result interface{}, method string
 			return err
 		}
 	}
-	setClientToSlice(result, c)
 	return nil
 }
 
